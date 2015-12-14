@@ -1,0 +1,5 @@
+name: advent-calendar
+version: 0.0.1
+description: Solutions for sample problems from http://adventofcode.com/
+#dependencies:
+#  foo_bar: '>=1.0.0 <2.0.0'
