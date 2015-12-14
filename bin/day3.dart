@@ -2,7 +2,7 @@ import 'dart:io' show File;
 import 'dart:math' show Point;
 
 main() async {
-  List directions = (await new File('bin/day3_input.txt').readAsString()).split('');
+  List directions = (await new File('inputs/day3_input.txt').readAsString()).split('');
 
   Point currentHouse = const Point(0, 0);
   Set housesVisited = new Set()..add(currentHouse);

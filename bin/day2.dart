@@ -2,7 +2,7 @@ import 'dart:io' show File;
 import 'dart:math' show min;
 
 main() async {
-  List boxes = await new File('bin/day2_input.txt').readAsLines();
+  List boxes = await new File('inputs/day2_input.txt').readAsLines();
 
   int area = 0;
   for (String box in boxes) {
