@@ -3,35 +3,29 @@ import 'dart:math' show Point;
 
 main() async {
   List directions = (await new File('bin/day3_input.txt').readAsString()).split('');
-  List housesVisited = [];
-  Point root = const Point(0, 0);
 
-  visitHouse(Point house) {
-    if (!housesVisited.contains(house)) {
-      housesVisited.add(house);
-      root = house;
-    } else {
-      root = house;
-    }
-  }
-
-  visitHouse(root);
+  Point currentHouse = const Point(0, 0);
+  Set housesVisited = new Set()..add(currentHouse);
 
   for (var direction in directions) {
+    var delta;
     switch (direction) {
       case '<':
-        visitHouse(root + const Point(-1, 0));
+        delta = const Point(-1, 0);
         break;
       case '>':
-        visitHouse(root + const Point(1, 0));
+        delta = const Point(1, 0);
         break;
       case '^':
-        visitHouse(root + const Point(0, 1));
+        delta = const Point(0, 1);
         break;
       case 'v':
-        visitHouse(root + const Point(0, -1));
+        delta = const Point(0, -1);
         break;
     }
+
+    currentHouse += delta;
+    housesVisited.add(currentHouse);
   }
 
   print(housesVisited.length);
