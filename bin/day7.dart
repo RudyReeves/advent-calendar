@@ -7,9 +7,7 @@ class Wire {
   final String name;
   Wire link;
   int _signal;
-
   get signal => _signal ?? link?.signal;
-
   set signal(signal) => _signal = signal;
 
   Wire(this.name);
@@ -61,42 +59,9 @@ class Gate {
   }
 }
 
-/// Whether a token is a Wire or int
-bool isWire(token) {
-  if (token == null) return false;
-  if (token is int) return false;
-  if (token is Wire) return true;
-  // The token is a String
-  return !stringIsInt(token);
-}
-
-bool stringIsInt(token) {
-  try {
-    int.parse(token);
-    return true;
-  } catch (_) {
-    return false;
-  }
-}
-
-/// Takes a token and returns an int or Wire
-parseToken(token) {
-  if (!isWire(token)) {
-    return int.parse(token);
-  }
-
-  // Return the wire or create a new one
-  try {
-      return wires.where((w) => w.name == token).single;
-  } catch (_) {
-    var wire = new Wire(token);
-    wires.add(wire);
-    return wire;
-  }
-}
-
 runGates() {
   var _gates = new List.from(gates);
+
   for (var gate in _gates) {
     if (gate.isConnected()) {
       gate.run();
@@ -106,28 +71,58 @@ runGates() {
   }
 }
 
+// Whether a token string looks like a wire name, or int
+bool isWire(token) {
+  if (token == null) return false;
+  if (token is int) return false;
+  if (token is Wire) return true;
+
+  // The token is a String :(
+  try {
+    int.parse(token);
+    return false;
+  } catch (_) {
+    return true;
+  }
+}
+
+// Takes a token string and returns a Wire or int
+parseToken(token) {
+  if (!isWire(token)) {
+    return int.parse(token);
+  }
+
+  // Return the wire or create a new one
+  try {
+    return wires.where((w) => w.name == token).single;
+  } catch (_) {
+    var wire = new Wire(token);
+    wires.add(wire);
+    return wire;
+  }
+}
+
 main() async {
   List instructions = await new File('inputs/day7_input.txt').readAsLines();
 
   for (var instruction in instructions) {
     List tokens = instruction.split(' ');
 
-    // The parseToken() calls may return an int or a Wire
     switch (tokens.length) {
       case 5: // Binary operation
-        var input1 = parseToken(tokens.first);
-        var input2 = parseToken(tokens[2]);
-        Wire outputWire = parseToken(tokens.last);
+        var input1 = parseToken(tokens.first); // Wire or int
+        var input2 = parseToken(tokens[2]); // Wire or int
+        Wire outputWire = parseToken(tokens.last); // Wire
         gates.add(new Gate(tokens[1], outputWire, input1, input2));
         break;
       case 4: // "NOT" operation
-        var input = parseToken(tokens[1]);
-        var outputWire = parseToken(tokens.last);
+        var input = parseToken(tokens[1]); // Wire
+        var outputWire = parseToken(tokens.last); // Wire
         gates.add(new Gate('NOT', outputWire, input));
         break;
       case 3: // Instructions like "a->b"
-        var input = parseToken(tokens[0]);
-        var output = parseToken(tokens.last);
+        var input = parseToken(tokens[0]); // Wire or int
+        var output = parseToken(tokens.last); // Wire
         if (input is int) {
           output.signal = input;
         } else {
@@ -138,6 +133,5 @@ main() async {
   }
 
   runGates();
-
   print("\nResult: ${parseToken('a').signal}");
 }
