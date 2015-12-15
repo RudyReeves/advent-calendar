@@ -19,9 +19,9 @@ class Gate {
   Gate(this.operation, this.output, this.input1, [this.input2]);
 
   operate() {
-    // If an input is a Wire (not an int), get its signal
-    int signal1 = isWireName(input1) ? input1.signal : input1;
-    int signal2 = isWireName(input2) ? input2.signal : input2;
+    // Inputs can be Wires or ints - convert Wires to their int signals
+    int signal1 = isWire(input1) ? input1.signal : input1;
+    int signal2 = isWire(input2) ? input2.signal : input2;
 
     if (signal1 == null) return; // No signal
     if (operation != "NOT" && signal2 == null) return; // No signal
@@ -47,8 +47,8 @@ class Gate {
   }
 }
 
-/// Returns whether a token is an int or a wire name
-bool isWireName(token) {
+/// Whether a token is a Wire or int
+bool isWire(token) {
   if (token == null) return false;
   if (token is int) return false;
   if (token is Wire) return true;
@@ -56,7 +56,7 @@ bool isWireName(token) {
   return !stringIsInt(token);
 }
 
-bool stringIsInt(String token) {
+bool stringIsInt(token) {
   try {
     int.parse(token);
     return true;
@@ -67,11 +67,11 @@ bool stringIsInt(String token) {
 
 /// Takes a token and returns an int or Wire
 parseToken(token) {
-  if (!isWireName(token)) {
+  if (!isWire(token)) {
     return int.parse(token);
   }
 
-  // Return the wire with this name, or create a new one
+  // Return the wire or create a new one
   try {
       return wires.where((w) => w.name == token).single;
   } catch (_) {
@@ -86,7 +86,12 @@ connectWire(wire) {
   for (var gate in gates) {
     if (gate.input1 == wire || gate.input2 == wire) {
       gate.operate();
-      print('${gate.input1} ${gate.operation} ${gate.input2} -> ${gate.output.name}.signal = ${gate.output.signal}');
+
+      if (gate.operation == "NOT") {
+        print("NOT ${gate.input1} -> ${gate.output.name}.signale = ${gate.output.signal}");
+      } else {
+        print('${gate.input1} ${gate.operation} ${gate.input2} -> ${gate.output.name}.signal = ${gate.output.signal}');
+      }
     }
   }
 }
@@ -108,29 +113,29 @@ main() async {
   List startingWires = [];
 
   for (var instruction in instructions) {
-    List<String> tokens = instruction.split(' ');
+    List tokens = instruction.split(' ');
+
     // The parseToken() calls may return an int or a Wire
     switch (tokens.length) {
-      case 5: // Binary op
+      case 5: // Binary operation
         var input1 = parseToken(tokens.first);
         var input2 = parseToken(tokens[2]);
         Wire outputWire = parseToken(tokens.last);
         gates.add(new Gate(tokens[1], outputWire, input1, input2));
         break;
-      case 4: // "NOT" op
+      case 4: // "NOT" operation
         var input = parseToken(tokens[1]);
         var outputWire = parseToken(tokens.last);
         gates.add(new Gate('NOT', outputWire, input));
         break;
-      case 3: // Instruction of the sort "a->b"
+      case 3: // Instructions like "a->b"
         var input = parseToken(tokens[0]);
         Wire outputWire = parseToken(tokens.last);
 
         if (input is int) {
           outputWire.signal = input;
           startingWires.add(outputWire);
-        } else {
-          outputWire.signal = input.signal; // May be null...
+          print("$outputWire.signal = $input");
         }
         break;
     }
