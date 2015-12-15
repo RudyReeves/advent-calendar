@@ -5,7 +5,13 @@ List<Gate> gates = [];
 
 class Wire {
   final String name;
-  int signal;
+  Wire link;
+  int _signal;
+
+  get signal => _signal ?? link?.signal;
+
+  set signal(signal) => _signal = signal;
+
   Wire(this.name);
   toString() => '$name';
 }
@@ -18,13 +24,22 @@ class Gate {
 
   Gate(this.operation, this.output, this.input1, [this.input2]);
 
-  operate() {
+  bool isConnected() {
     // Inputs can be Wires or ints - convert Wires to their int signals
     int signal1 = isWire(input1) ? input1.signal : input1;
     int signal2 = isWire(input2) ? input2.signal : input2;
 
-    if (signal1 == null) return; // No signal
-    if (operation != "NOT" && signal2 == null) return; // No signal
+    if (signal1 == null) return false;
+    if (operation != "NOT" && signal2 == null) return false;
+    return true;
+  }
+
+  run() {
+    if (!isConnected()) return;
+
+    // Inputs can be Wires or ints - convert Wires to their int signals
+    int signal1 = isWire(input1) ? input1.signal : input1;
+    int signal2 = isWire(input2) ? input2.signal : input2;
 
     switch (operation) {
       case "NOT":
@@ -43,7 +58,6 @@ class Gate {
         output.signal = (signal1 << signal2) & 0xFFFF;
         break;
     }
-    connectWire(output);
   }
 }
 
@@ -81,36 +95,30 @@ parseToken(token) {
   }
 }
 
-/// Feeds the wire through any gates it's connected to
-connectWire(wire) {
-  for (var gate in gates) {
-    if (gate.input1 == wire || gate.input2 == wire) {
-      gate.operate();
-
-      if (gate.operation == "NOT") {
-        print("NOT ${gate.input1} -> ${gate.output.name}.signal = ${gate.output.signal}");
-      } else {
-        print('${gate.input1} ${gate.operation} ${gate.input2} -> ${gate.output.name}.signal = ${gate.output.signal}');
-      }
+runGates() {
+  var _gates = new List.from(gates);
+  for (var gate in _gates) {
+    if (gate.isConnected()) {
+      gate.run();
+      gates.remove(gate);
+      return runGates();
     }
   }
 }
 
 main() async {
-//  List instructions = await new File('inputs/day7_input.txt').readAsLines();
+  List instructions = await new File('inputs/day7_input.txt').readAsLines();
 
-  List instructions = [
-    '123 -> x',
-    '456 -> y',
-    'x AND y -> d',
-    'x OR y -> e',
-    'x LSHIFT 2 -> f',
-    'y RSHIFT 2 -> g',
-    'NOT x -> h',
-    'NOT y -> i'
-  ];
-
-  List startingWires = [];
+//  List instructions = [
+//    '123 -> x',
+//    '456 -> y',
+//    'x AND y -> d',
+//    'x OR y -> e',
+//    'x LSHIFT 2 -> f',
+//    'y RSHIFT 2 -> g',
+//    'NOT x -> h',
+//    'NOT y -> i'
+//  ];
 
   for (var instruction in instructions) {
     List tokens = instruction.split(' ');
@@ -130,18 +138,17 @@ main() async {
         break;
       case 3: // Instructions like "a->b"
         var input = parseToken(tokens[0]);
-        Wire outputWire = parseToken(tokens.last);
-
+        var output = parseToken(tokens.last);
         if (input is int) {
-          outputWire.signal = input;
-          startingWires.add(outputWire);
-          print("$outputWire.signal = $input");
+          output.signal = input;
+        } else {
+          output.link = input;
         }
         break;
     }
   }
 
-  startingWires.forEach(connectWire);
+  runGates();
 
-  print("\nResult: ${parseToken('h').signal}");
+  print("\nResult: ${parseToken('a').signal}");
 }
