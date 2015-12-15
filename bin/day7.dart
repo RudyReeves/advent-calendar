@@ -9,8 +9,7 @@ class Wire {
   int _signal;
   get signal => _signal;
 
-  /// Sets a signal for this wire
-  /// Tells every gate to operate if one its inputs is this Wire
+  /// Tells every gate this wire is an input for that is has a signal now
   set signal(signal) {
     _signal = signal;
     Gate.runOperations(this);
@@ -53,21 +52,17 @@ class Wire {
   }
 }
 
-/// Represents a gate that can do a binary operation
-/// I consider "null" Gates to be a circuit connection (like "a->b")
 class Gate {
   final String operation;
 
-  // Could be an int (like "123 -> x")
-  // Could be a Wire (which knows its own signal, if it has one)
+  // Could be an int or Wire
   final input1;
 
-  // Always null for unary Gates ("NOT" and "null" gates)
-  // Could be a Wire (which knows its own signal, if it has one)
+  // Always null for unary Gates
+  // Could be a an int or Wire
   final input2;
 
-  // Never null, the Gate outputs to this Wire,
-  // when it gets the necessary input signals
+  // Never null, the Gate outputs to this Wire
   final outputWire;
 
   Gate(this.operation, this.outputWire, this.input1, [this.input2]) {
@@ -76,21 +71,18 @@ class Gate {
 
   /// Performs this Gates operation
   operate() {
-    bool isWire1 = Wire.isWire(input1); // Could be int or Wire
-    bool isWire2 = Wire.isWire(input2); // Could be int or Wire
-
-    // If input1 is a Wire, gets its signal (as an int)
-    int signal1 = isWire1 ? input1.signal : input1;
-    // If input2 is a Wire, gets its signal (as an int)
-    int signal2 = isWire2 ? input2.signal : input2;
+    // If input1 is a Wire (not an int), gets its signal (as an int)
+    int signal1 = Wire.isWire(input1) ? input1.signal : input1;
+    // If input2 is a Wire (not an int), gets its signal (as an int)
+    int signal2 = Wire.isWire(input2) ? input2.signal : input2;
 
     // We need at least one signal for this Gate to output anything
     if (signal1 == null) return;
 
-    // We need two signals for binary operations
+    // We need two signals for binary operations (operation==null means "a->b")
     if (operation != null && operation != "NOT" && signal2 == null) return;
 
-    // Each update the outputWire.signal= will trigger the runOperations() method below
+    // Each update to Wire.signal will check all the gates it may be an input for
     switch (operation) {
       case "NOT":
         outputWire.signal = (~signal1) & 0xFFFF;
@@ -115,8 +107,7 @@ class Gate {
 
   @override String toString() => 'Gate($operation, $input1, $input2, $outputWire)';
 
-  /// Loops through every  gate, and calls its operation if
-  /// one if its inputs is this wire (which just got a signal!)
+  /// When a wire gets a signal, run each gate's operation the wire is an input for
   static runOperations(Wire wire) {
     for (Gate gate in gates) {
       if (gate.input1 == wire || gate.input2 == wire) {
@@ -133,8 +124,7 @@ main() async {
   for (String instruction in instructions) {
     List<String> tokens = instruction.split(' ');
 
-    // The following getByToken() calls may return an int or a Wire,
-    // each time creating a new Gate with the proper operation and inputs
+    // The getByToken() calls may return an int or a Wire
     switch (tokens.length) {
       case 5: // Binary op
         var input1 = Wire.getByToken(tokens.first);
