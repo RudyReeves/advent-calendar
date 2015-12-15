@@ -6,50 +6,45 @@ List<Gate> gates = [];
 class Wire {
   final String name;
   int signal;
-  Wire(this.name); // Dart constructor
+  Wire(this.name);
+  toString() => '$name';
 }
 
 class Gate {
   final String operation;
 
-  // Could be an int or Wire
   final input1;
   final input2;
+  final output;
 
-  // Never null, the Gate outputs to this Wire
-  final Wire outputWire;
-
-  Gate(this.operation, this.outputWire, this.input1, [this.input2]) {
-    operate();
-  }
+  Gate(this.operation, this.output, this.input1, [this.input2]);
 
   operate() {
-    // If input is a Wire (not an int), gets its int signal
+    // If input is a Wire (not an int), gets its signal
     int signal1 = isWireName(input1) ? input1.signal : input1;
     int signal2 = isWireName(input2) ? input2.signal : input2;
 
     if (signal1 == null) return;
-
-    // It's okay if signal2 is null for "NOT" operations
     if (operation != "NOT" && signal2 == null) return;
 
     switch (operation) {
       case "NOT":
-        outputWire.signal = (~signal1) & 0xFFFF;
+        output.signal = (~signal1) & 0xFFFF;
         break;
       case "AND":
-        outputWire.signal = (signal1 & signal2) & 0xFFFF;
+        output.signal = (signal1 & signal2) & 0xFFFF;
         break;
       case "OR":
-        outputWire.signal = (signal1 | signal2) & 0xFFFF;
+        output.signal = (signal1 | signal2) & 0xFFFF;
         break;
       case "RSHIFT":
-        outputWire.signal = (signal1 >> signal2) & 0xFFFF;
+        output.signal = (signal1 >> signal2) & 0xFFFF;
         break;
       case "LSHIFT":
-        outputWire.signal = (signal1 << signal2) & 0xFFFF;
+        output.signal = (signal1 << signal2) & 0xFFFF;
         break;
     }
+    connectWire(output);
   }
 }
 
@@ -58,38 +53,63 @@ bool isWireName(token) {
   if (token == null) return false;
   if (token is int) return false;
   if (token is Wire) return true;
+  // The token is a String
+  return !stringIsInt(token);
+}
 
-  // The token is a String :(
+bool stringIsInt(String token) {
   try {
     int.parse(token);
-    return false;
-  } on FormatException catch (_) {
     return true;
+  } catch (_) {
+    return false;
   }
 }
 
-/// A token is a wire name or an int
-/// If it's a wire name that doesn't exist, creates a new Wire.
+/// Takes a token and returns an int or Wire
 parseToken(token) {
-  if (isWireName(token)) {
-    try {
+  if (!isWireName(token)) {
+    return int.parse(token);
+  }
+
+  // Return the wire with this name, or create a new one
+  try {
       return wires.where((w) => w.name == token).single;
-    } catch (_) {
-      var wire = new Wire(token);
-      wires.add(wire);
-      return wire;
+  } catch (_) {
+    var wire = new Wire(token);
+    wires.add(wire);
+    return wire;
+  }
+}
+
+/// Feeds the wire through any gates it's connected to
+connectWire(wire) {
+  for (var gate in gates) {
+    if (gate.input1 == wire || gate.input2 == wire) {
+      gate.operate();
+      print('${gate.input1} ${gate.operation} ${gate.input2} -> ${gate.output.name}.signal = ${gate.output.signal}');
     }
   }
-  return int.parse(token);
 }
 
 main() async {
-  List instructions = await new File('inputs/day7_input.txt').readAsLines();
+//  List instructions = await new File('inputs/day7_input.txt').readAsLines();
 
+  List instructions = [
+    '123 -> x',
+    '456 -> y',
+    'x AND y -> d',
+    'x OR y -> e',
+    'x LSHIFT 2 -> f',
+    'y RSHIFT 2 -> g',
+    'NOT x -> h',
+    'NOT y -> i'
+  ];
 
-  for (String instruction in instructions) {
+  List startingWires = [];
+
+  for (var instruction in instructions) {
     List<String> tokens = instruction.split(' ');
-
     // The parseToken() calls may return an int or a Wire
     switch (tokens.length) {
       case 5: // Binary op
@@ -103,13 +123,21 @@ main() async {
         var outputWire = parseToken(tokens.last);
         gates.add(new Gate('NOT', outputWire, input));
         break;
-      case 3: // Operation of the sort "a->b"
+      case 3: // Instruction of the sort "a->b"
         var input = parseToken(tokens[0]);
         Wire outputWire = parseToken(tokens.last);
-        gates.add(new Gate(null, outputWire, input));
+
+        if (input is int) {
+          outputWire.signal = input;
+          startingWires.add(outputWire);
+        } else {
+          outputWire.signal = input.signal; // May be null...
+        }
         break;
     }
   }
 
-  print(parseToken('a').signal);
+  startingWires.forEach(connectWire);
+
+  print("\nResult: ${parseToken('h').signal}");
 }
