@@ -5,35 +5,8 @@ List<Gate> gates = [];
 
 class Wire {
   final String name;
-
-  int _signal;
-  get signal => _signal;
-
-  /// Tells every gate this wire is an input for that is has a signal now
-  set signal(signal) {
-    _signal = signal;
-    gates.where((gate) => gate.input1 == this || gate.input2 == this)
-        .forEach((gate) => gate.operate());
-  }
-
+  int signal;
   Wire(this.name); // Dart constructor
-
-
-  /// Returns whether a token is an int or a wire name
-  static bool isWire(token) {
-    if (token == null) return false;
-
-    if (token is int) return false;
-    if (token is Wire) return true;
-
-    // token is a String :(
-    try {
-      int.parse(token);
-      return false;
-    } on FormatException catch (_) {
-      return true;
-    }
-  }
 }
 
 class Gate {
@@ -52,15 +25,14 @@ class Gate {
 
   operate() {
     // If input is a Wire (not an int), gets its int signal
-    int signal1 = Wire.isWire(input1) ? input1.signal : input1;
-    int signal2 = Wire.isWire(input2) ? input2.signal : input2;
+    int signal1 = isWireName(input1) ? input1.signal : input1;
+    int signal2 = isWireName(input2) ? input2.signal : input2;
 
     if (signal1 == null) return;
 
-    // It's okay if signal2 is null for unary operations ("NOT" and "a->b")
-    if (operation != null && operation != "NOT" && signal2 == null) return;
+    // It's okay if signal2 is null for "NOT" operations
+    if (operation != "NOT" && signal2 == null) return;
 
-    // Each update to Wire.signal will check all the gates it may be an input for
     switch (operation) {
       case "NOT":
         outputWire.signal = (~signal1) & 0xFFFF;
@@ -77,17 +49,29 @@ class Gate {
       case "LSHIFT":
         outputWire.signal = (signal1 << signal2) & 0xFFFF;
         break;
-      default:
-        outputWire.signal = signal1;
-        break;
     }
+  }
+}
+
+/// Returns whether a token is an int or a wire name
+bool isWireName(token) {
+  if (token == null) return false;
+  if (token is int) return false;
+  if (token is Wire) return true;
+
+  // The token is a String :(
+  try {
+    int.parse(token);
+    return false;
+  } on FormatException catch (_) {
+    return true;
   }
 }
 
 /// A token is a wire name or an int
 /// If it's a wire name that doesn't exist, creates a new Wire.
 parseToken(token) {
-  if (Wire.isWire(token)) {
+  if (isWireName(token)) {
     try {
       return wires.where((w) => w.name == token).single;
     } catch (_) {
@@ -106,7 +90,7 @@ main() async {
   for (String instruction in instructions) {
     List<String> tokens = instruction.split(' ');
 
-    // The getByToken() calls may return an int or a Wire
+    // The parseToken() calls may return an int or a Wire
     switch (tokens.length) {
       case 5: // Binary op
         var input1 = parseToken(tokens.first);
