@@ -88,7 +88,7 @@ connectWire(wire) {
       gate.operate();
 
       if (gate.operation == "NOT") {
-        print("NOT ${gate.input1} -> ${gate.output.name}.signale = ${gate.output.signal}");
+        print("NOT ${gate.input1} -> ${gate.output.name}.signal = ${gate.output.signal}");
       } else {
         print('${gate.input1} ${gate.operation} ${gate.input2} -> ${gate.output.name}.signal = ${gate.output.signal}');
       }
