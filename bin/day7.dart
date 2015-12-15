@@ -109,17 +109,6 @@ runGates() {
 main() async {
   List instructions = await new File('inputs/day7_input.txt').readAsLines();
 
-//  List instructions = [
-//    '123 -> x',
-//    '456 -> y',
-//    'x AND y -> d',
-//    'x OR y -> e',
-//    'x LSHIFT 2 -> f',
-//    'y RSHIFT 2 -> g',
-//    'NOT x -> h',
-//    'NOT y -> i'
-//  ];
-
   for (var instruction in instructions) {
     List tokens = instruction.split(' ');
 
