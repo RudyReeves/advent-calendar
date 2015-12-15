@@ -12,7 +12,6 @@ class Wire {
 
 class Gate {
   final String operation;
-
   final input1;
   final input2;
   final output;
@@ -20,12 +19,12 @@ class Gate {
   Gate(this.operation, this.output, this.input1, [this.input2]);
 
   operate() {
-    // If input is a Wire (not an int), gets its signal
+    // If an input is a Wire (not an int), get its signal
     int signal1 = isWireName(input1) ? input1.signal : input1;
     int signal2 = isWireName(input2) ? input2.signal : input2;
 
-    if (signal1 == null) return;
-    if (operation != "NOT" && signal2 == null) return;
+    if (signal1 == null) return; // No signal
+    if (operation != "NOT" && signal2 == null) return; // No signal
 
     switch (operation) {
       case "NOT":
