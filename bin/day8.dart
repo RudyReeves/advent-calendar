@@ -2,7 +2,6 @@ import 'dart:io';
 
 main() async {
   List lines = await new File('inputs/day8_input.txt').readAsLines();
-//  var lines = [r'xziq\\\x18ybyv\x9am\"neacoqjzytertisysza'];
   int count = 0;
 
   for (var line in lines) {
@@ -24,4 +23,27 @@ main() async {
     count += difference;
   }
   print(count);
+  print("Part 2: ${part2(lines)}");
+}
+
+part2(lines) {
+  int count = 0;
+
+  for (var line in lines) {
+    int length = line.length;
+    int escapeLength = length;
+    line = line.replaceAll(r'\\', r'\"');
+    var chars = line.split('');
+    for (var char in chars) {
+      if (char == '"') {
+        escapeLength++;
+      } else if (char == r'\') {
+        escapeLength++;
+      }
+    }
+    int difference = escapeLength - length + 2;
+    count += difference;
+  }
+
+  return count;
 }

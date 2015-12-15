@@ -134,4 +134,38 @@ main() async {
 
   runGates();
   print("\nResult: ${parseToken('a').signal}");
+  print("Part2: ${part2(instructions)}");
+}
+
+part2(instructions) {
+  for (var instruction in instructions) {
+    List tokens = instruction.split(' ');
+
+    switch (tokens.length) {
+      case 5: // Binary operation
+        var input1 = parseToken(tokens.first); // Wire or int
+        var input2 = parseToken(tokens[2]); // Wire or int
+        Wire outputWire = parseToken(tokens.last); // Wire
+        gates.add(new Gate(tokens[1], outputWire, input1, input2));
+        break;
+      case 4: // "NOT" operation
+        var input = parseToken(tokens[1]); // Wire
+        var outputWire = parseToken(tokens.last); // Wire
+        gates.add(new Gate('NOT', outputWire, input));
+        break;
+      case 3: // Instructions like "a->b"
+        var input = parseToken(tokens[0]); // Wire or int
+        var output = parseToken(tokens.last); // Wire
+        if (input is int) {
+          output.signal = input;
+        } else {
+          output.link = input;
+        }
+        break;
+    }
+  }
+
+  parseToken('b').signal = 46065;
+  runGates();
+  return parseToken('a').signal;
 }

@@ -29,4 +29,43 @@ main() async {
   }
 
   print(housesVisited.length);
+  print("Part2: ${part2(directions)}");
+}
+
+part2(directions) {
+  bool santasTurn = true;
+
+  const startingPoint = const Point(0, 0);
+  Set housesVisited = new Set()..add(startingPoint);
+
+  Point currentSantaHouse = startingPoint;
+  Point currentRoboHouse = startingPoint;
+
+  for (var direction in directions) {
+    var delta;
+    switch (direction) {
+      case '<':
+        delta = const Point(-1, 0);
+        break;
+      case '>':
+        delta = const Point(1, 0);
+        break;
+      case '^':
+        delta = const Point(0, 1);
+        break;
+      case 'v':
+        delta = const Point(0, -1);
+        break;
+    }
+    if (santasTurn) {
+      currentSantaHouse += delta;
+      housesVisited.add(currentSantaHouse);
+    } else {
+      currentRoboHouse += delta;
+      housesVisited.add(currentRoboHouse);
+    }
+    santasTurn = !santasTurn;
+  }
+
+  return housesVisited.length;
 }

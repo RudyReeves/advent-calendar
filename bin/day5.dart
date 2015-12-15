@@ -14,4 +14,18 @@ main() async {
     }
   }
   print(niceStrings);
+  print("Part 2: ${part2(strings)}");
+}
+
+part2(strings) {
+  int niceStrings = 0;
+  for (var string in strings) {
+    if (string.isEmpty) continue;
+    bool reg1 = new RegExp(r'([a-z]{2})[a-z]*\1').hasMatch(string);
+    bool reg2 = new RegExp(r'([a-z])[a-z]\1').hasMatch(string);
+    if (reg1 && reg2) {
+      niceStrings++;
+    }
+  }
+  return niceStrings;
 }
