@@ -21,13 +21,14 @@ class Wire {
 
   @override String toString() => 'Wire($name)';
 
-  /// Returns whether a token is a number (a signal) or a wire name
+  /// Returns whether a token is an int or a wire name
   static bool isWire(token) {
     if (token == null) return false;
 
     if (token is int) return false;
     if (token is Wire) return true;
 
+    // token is a String
     try {
       int.parse(token);
       return false;
@@ -37,7 +38,7 @@ class Wire {
   }
 
   /// Returns a Wire or int from its name (token)
-  /// If it doesn't exist, creates a new one.
+  /// If it's a wire name that doesn't exist, creates a new Wire.
   static getByToken(token) {
     if (isWire(token)) {
       try {
@@ -57,18 +58,16 @@ class Wire {
 class Gate {
   final String operation;
 
-  // Could be an int (a signal, e.g. "123 -> x")
+  // Could be an int (like "123 -> x")
   // Could be a Wire (which knows its own signal, if it has one)
-  // Could be null (no Wire or int)
   final input1;
 
   // Always null for unary Gates ("NOT" and "null" gates)
   // Could be a Wire (which knows its own signal, if it has one)
-  // Could be null (no Wire or int)
   final input2;
 
   // Never null, the Gate outputs to this Wire,
-  // when it gets the necessary signals
+  // when it gets the necessary input signals
   final outputWire;
 
   Gate(this.operation, this.outputWire, this.input1, [this.input2]) {
@@ -81,9 +80,9 @@ class Gate {
     bool isWire2 = Wire.isWire(input2); // Could be int or Wire
 
     // If input1 is a Wire, gets its signal (as an int)
-    var signal1 = isWire1 ? input1.signal : input1;
+    int signal1 = isWire1 ? input1.signal : input1;
     // If input2 is a Wire, gets its signal (as an int)
-    var signal2 = isWire2 ? input2.signal : input2;
+    int signal2 = isWire2 ? input2.signal : input2;
 
     // We need at least one signal for this Gate to output anything
     if (signal1 == null) return;
@@ -116,8 +115,8 @@ class Gate {
 
   @override String toString() => 'Gate($operation, $input1, $input2, $outputWire)';
 
-  /// Loops through every single gate, and call its operate() method if
-  /// one if its inputs is this wire (which just got a signal)
+  /// Loops through every  gate, and calls its operation if
+  /// one if its inputs is this wire (which just got a signal!)
   static runOperations(Wire wire) {
     for (Gate gate in gates) {
       if (gate.input1 == wire || gate.input2 == wire) {
@@ -129,6 +128,7 @@ class Gate {
 
 main() async {
   List instructions = await new File('inputs/day7_input.txt').readAsLines();
+
 
   for (String instruction in instructions) {
     List<String> tokens = instruction.split(' ');
