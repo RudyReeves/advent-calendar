@@ -54,10 +54,10 @@ main() async {
 
     // Select next location
     place = nextFlight.node1 == place ? nextFlight.node1 : nextFlight.node2;
+    visited.add(place);
 
     // You've traveled at least once, but this isn't your final destination
-    bool chargeRate = (visited.length > 0 && visited.length != flightsTable.keys.length);
-    visited.add(place);
+    bool chargeRate = (visited.length >= 0 && visited.length != flightsTable.keys.length - 1);
 
     // Add charge except for last location
     if (chargeRate) {
