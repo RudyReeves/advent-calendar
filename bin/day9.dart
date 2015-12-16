@@ -57,7 +57,7 @@ main() async {
     visited.add(place);
 
     // You've traveled at least once, but this isn't your final destination
-    bool chargeRate = (visited.length > 0 && visited.length < flightsTable.keys.length);
+    bool chargeRate = (visited.length >= 0 && visited.length != flightsTable.keys.length - 1);
     print("${(!chargeRate ? 'Arrived at' : 'Going to')} $place - ${!chargeRate ? 'no charge' : nextFlight.cost})");
 
     // Add charge except for last location
