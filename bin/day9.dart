@@ -1,4 +1,4 @@
- import 'dart:io';
+import 'dart:io';
 
 class Flightpath {
   String node1;
@@ -11,7 +11,8 @@ Map<String, List<Flightpath>> flightsTable = {};
 List visited = [];
 
 main() async {
-   List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
+  List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
+
 
   for (String line in lines) {
     // Parse input
