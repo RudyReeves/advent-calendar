@@ -1,4 +1,4 @@
-import 'dart:io';
+ import 'dart:io';
 
 class Flightpath {
   String node1;
@@ -11,7 +11,7 @@ Map<String, List<Flightpath>> flightsTable = {};
 List visited = [];
 
 main() async {
-  List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
+   List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
 
   for (String line in lines) {
     // Parse input
@@ -43,24 +43,24 @@ main() async {
     if (visited.contains(place)) continue;
 
     // Calculate minimum distance (cost)
-    Flightpath nextRoute = flightsTable[place].first;
-    int shortest = nextRoute.cost;
-    for (Flightpath route in flightsTable[place]) {
-      if (route.cost < shortest) {
-        shortest = route.cost;
-        nextRoute = route;
+    Flightpath nextFlight = flightsTable[place].first;
+    int shortest = nextFlight.cost;
+    for (Flightpath flight in flightsTable[place]) {
+      if (flight.cost < shortest) {
+        shortest = flight.cost;
+        nextFlight = flight;
       }
     }
 
     // Select next location
-    place = nextRoute.node1 == place ? nextRoute.node1 : nextRoute.node2;
-    print("Going to: ${place} (${nextRoute.cost})");
+    place = nextFlight.node1 == place ? nextFlight.node1 : nextFlight.node2;
+    print("Going to: ${place} (${nextFlight.cost})");
+    visited.add(place);
 
     // Add cost except for first location
-    if (visited.length > 0) {
-      totalCost += nextRoute.cost;
+    if (visited.length > 0 && visited.length != flightsTable.keys.length - 1) {
+      totalCost += nextFlight.cost;
     }
-    visited.add(place);
   }
 
   print(totalCost);
