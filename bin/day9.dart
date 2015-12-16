@@ -56,13 +56,15 @@ main() async {
     place = nextFlight.node1 == place ? nextFlight.node1 : nextFlight.node2;
     visited.add(place);
 
+    // You've traveled at least once, but this isn't your final destination
     bool chargeRate = (visited.length > 0 && visited.length < flightsTable.keys.length);
-    print("Going to: ${place} (${!chargeRate ? 'no charge' : nextFlight.cost})");
-    // Add cost except for first location
+    print("${(!chargeRate ? 'Arrived at' : 'Going to')} $place - ${!chargeRate ? 'no charge' : nextFlight.cost})");
+
+    // Add charge except for last location
     if (chargeRate) {
       totalCost += nextFlight.cost;
     }
   }
 
-  print(totalCost);
+  print("\nTotal - $totalCost");
 }
