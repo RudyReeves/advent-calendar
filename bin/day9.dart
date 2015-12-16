@@ -13,7 +13,6 @@ List visited = [];
 main() async {
   List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
 
-
   for (String line in lines) {
     // Parse input
     List<String> tokens = line.split(' ');
@@ -55,11 +54,12 @@ main() async {
 
     // Select next location
     place = nextFlight.node1 == place ? nextFlight.node1 : nextFlight.node2;
-    print("Going to: ${place} (${nextFlight.cost})");
     visited.add(place);
 
+    bool chargeRate = (visited.length > 0 && visited.length < flightsTable.keys.length);
+    print("Going to: ${place} (${!chargeRate ? 'no charge' : nextFlight.cost})");
     // Add cost except for first location
-    if (visited.length > 0 && visited.length != flightsTable.keys.length - 1) {
+    if (chargeRate) {
       totalCost += nextFlight.cost;
     }
   }
