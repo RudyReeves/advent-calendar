@@ -32,10 +32,6 @@ main() async {
     places.add(new Place(to, from, distance)); // Add 2-way city connections
   }
 
-  for (Place place in places) {
-    print("${place.from} -> ${place.to}");
-  }
-
   // Gets *all* the permutations of the places
   List permutations = permute(places);
 
