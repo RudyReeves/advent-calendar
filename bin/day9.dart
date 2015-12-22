@@ -32,10 +32,13 @@ main() async {
 
   // Get *all* the permutations of the places (even if they're not neighbors)
   List permutations = permute(places);
-  int shortest = distance(permutations.first);
 
+  // Assume the first permutation is the shortest
+  int shortest = routeDistance(permutations.first);
+
+  // Loop through the other permutations and try to find a shorter one
   for (List permutation in permutations) {
-    int dist = distance(permutation);
+    int dist = routeDistance(permutation);
     if (dist < shortest) {
       shortest = dist;
     }
@@ -44,9 +47,8 @@ main() async {
   print(shortest);
 }
 
-
-// Gets the *total* distance of the route in the places[] list
-int distance(List<Place> places) {
+// Gets the *total* distance of the route in the places[] argument
+int routeDistance(List<Place> places) {
   int dist = 0;
   for (int i = 1; i < places.length; i++) {
     dist += places[i].distance;
@@ -54,8 +56,8 @@ int distance(List<Place> places) {
   return dist;
 }
 
-// Takes any list and returns *all* its permutations
-List permute(List list) {
+// Takes any list and returns a list *all* its permutations
+List<List> permute(List list) {
   if (list.isEmpty) return [[]];
 
   var firstElement = list.removeAt(0);
