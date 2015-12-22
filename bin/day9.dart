@@ -1,4 +1,4 @@
-//import 'dart:io' show File;
+import 'dart:io' show File;
 
 List<Place> places = [];
 int shortest; // Initializes to null
@@ -12,14 +12,14 @@ class Place {
 }
 
 main() async {
-//  List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
+  List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
 
 //  Mock data
-  List lines = [
-    'London to Dublin = 464',
-    'London to Belfast = 518',
-    'Dublin to Belfast = 141'
-  ];
+//  List lines = [
+//    'London to Dublin = 464',
+//    'London to Belfast = 518',
+//    'Dublin to Belfast = 141'
+//  ];
 
   for (String line in lines) {
     // Parse input
