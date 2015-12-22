@@ -1,24 +1,25 @@
-import 'dart:io' show File;
+//import 'dart:io' show File;
 
 List<Place> places = [];
-int shortest;
+int shortest; // Initializes to null
 
 class Place {
   final String from;
   final String to;
   final int distance;
-  const Place(this.from, this.to, this.distance);
+  const Place(this.from, this.to, this.distance); // Trivial constructor
+  toString() => '($from, $to, $distance)';
 }
 
 main() async {
-  List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
+//  List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
 
 //  Mock data
-//  List lines = [
-//    'London to Dublin = 464',
-//    'London to Belfast = 518',
-//    'Dublin to Belfast = 141'
-//  ];
+  List lines = [
+    'London to Dublin = 464',
+    'London to Belfast = 518',
+    'Dublin to Belfast = 141'
+  ];
 
   for (String line in lines) {
     // Parse input
@@ -27,16 +28,21 @@ main() async {
     String to = tokens[2];
     int distance = int.parse(tokens[4]);
 
-    places.add(new Place(from, to, distance));
+    places.add(new Place(from, to, distance)); // Add 2-way city connections
+    places.add(new Place(to, from, distance)); // Add 2-way city connections
   }
 
-  // Get *all* the permutations of the places (even if they're not neighbors)
+  for (Place place in places) {
+    print("${place.from} -> ${place.to}");
+  }
+
+  // Gets *all* the permutations of the places
   List permutations = permute(places);
 
   // Assume the first permutation is the shortest
   int shortest = routeDistance(permutations.first);
 
-  // Loop through the other permutations and try to find a shorter one
+  // Loop through the permutations and try to find a shorter one
   for (List permutation in permutations) {
     int dist = routeDistance(permutation);
     if (dist < shortest) {
@@ -56,14 +62,14 @@ int routeDistance(List<Place> places) {
   return dist;
 }
 
-// Takes any list and returns a list *all* its permutations
+// Takes any list and returns a list of *all* its permutations
+// It's reflexive; the logic here is convoluted, but it works
 List<List> permute(List list) {
   if (list.isEmpty) return [[]];
 
-  var firstElement = list.removeAt(0);
+  Place firstElement = list.removeAt(0);
   List returnValue = [];
   List permutations = permute(list);
-
   for (List permutation in permutations) {
     for (int i = 0; i <= permutation.length; i++) {
       List temp = new List.from(permutation);
