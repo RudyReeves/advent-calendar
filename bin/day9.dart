@@ -1,6 +1,7 @@
-//import 'dart:io' show File;
+import 'dart:io' show File;
 
 List<Place> places = [];
+int shortest;
 
 class Place {
   final String from;
@@ -9,16 +10,15 @@ class Place {
   const Place(this.from, this.to, this.distance);
 }
 
-int shortest;
-
 main() async {
-//  List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
+  List<String> lines = await new File('inputs/day9_input.txt').readAsLines();
 
-  List lines = [
-    'London to Dublin = 464',
-    'London to Belfast = 518',
-    'Dublin to Belfast = 141'
-  ];
+//  Mock data
+//  List lines = [
+//    'London to Dublin = 464',
+//    'London to Belfast = 518',
+//    'Dublin to Belfast = 141'
+//  ];
 
   for (String line in lines) {
     // Parse input
@@ -27,10 +27,10 @@ main() async {
     String to = tokens[2];
     int distance = int.parse(tokens[4]);
 
-    Place place = new Place(from, to, distance);
-    places.add(place);
+    places.add(new Place(from, to, distance));
   }
 
+  // Get *all* the permutations of the places (even if they're not neighbors)
   List permutations = permute(places);
   int shortest = distance(permutations.first);
 
@@ -44,6 +44,8 @@ main() async {
   print(shortest);
 }
 
+
+// Gets the *total* distance of the route in the places[] list
 int distance(List<Place> places) {
   int dist = 0;
   for (int i = 1; i < places.length; i++) {
@@ -52,6 +54,7 @@ int distance(List<Place> places) {
   return dist;
 }
 
+// Takes any list and returns *all* its permutations
 List permute(List list) {
   if (list.isEmpty) return [[]];
 
