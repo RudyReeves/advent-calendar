@@ -2,12 +2,12 @@ import 'dart:io' show File;
 import 'dart:collection' show LinkedHashMap;
 
 List<String> lines;
-List<City> cities = [];
-List<City> visited = [];
+List<City> cities;
+List<City> visited;
 
 main() async {
-  print("Part 1: ${await tryAllPaths()}");
-  print("Part 2: ${await tryAllPaths(closest: false)}");
+  print("Part 1: ${await bestTravelDistance()}");
+  print("Part 2: ${await bestTravelDistance(closest: false)}");
 }
 
 readFile() async {
@@ -31,6 +31,7 @@ readFile() async {
 class City {
   final String name;
   Map<City, int> distances;
+  City(this.name, this.distances);
 
   static getByName(String name) {
     var lookup = cities.where((place) => place.name == name);
@@ -47,29 +48,22 @@ class City {
     sorter(p1, p2) => (distances[p1] - distances[p2]) * (closest ? 1 : -1);
     var keys = distances.keys.toList()..sort(sorter);
     var sorted = new LinkedHashMap.fromIterable(keys, value: (v) => distances[v]);
-    try {
-      return sorted.keys.firstWhere((p) => !visited.contains(p));
-    } catch (_) {
-      return null;
-    }
+    return sorted.keys.firstWhere((p) => !visited.contains(p), orElse: () => null);
   }
-
-  City(this.name, this.distances);
-  toString() => '($name, ${distances.length})';
 }
 
-tryAllPaths({bool closest: true}) async {
+bestTravelDistance({bool closest: true}) async {
   await readFile();
-  List distances = [];
+  var distances = [];
   for (int i = 0; i < cities.length; i++) {
-    distances.add(tryPath(cities[i], closest: closest));
+    distances.add(travelDistance(cities[i], closest: closest));
     await readFile();
   }
-  distances.sort((d1, d2) => (d1 - d2) * (closest ? 1 : -1));
-  return distances.first;
+  distances.sort();
+  return closest ? distances.first : distances.last;
 }
 
-tryPath(City city, {bool closest: true}) {
+travelDistance(City city, {bool closest: true}) {
   int distance = 0;
   var current = city;
   while (cities.isNotEmpty) {
