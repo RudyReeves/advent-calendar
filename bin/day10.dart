@@ -2,7 +2,7 @@ final input = 1113122113;
 
 lookAndSay(int n) {
   List<String> digits = n.toString().split('');
-  String result = '';
+  var result = new StringBuffer();
 
   String currentDigit = digits.first;
   int count = 0;
@@ -11,15 +11,14 @@ lookAndSay(int n) {
     if (digit == currentDigit) {
       count++;
     } else {
-      result += '$count$currentDigit';
+      result.write('$count$currentDigit');
       currentDigit = digit;
       count = 1;
     }
   }
+  result.write('$count$currentDigit');
 
-  result += '$count$currentDigit';
-
-  return int.parse(result);
+  return int.parse('$result');
 }
 
 main() {
