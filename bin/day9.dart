@@ -6,6 +6,7 @@ List<City> cities;
 List<City> visited;
 
 main() async {
+  lines = await new File('inputs/day9_input.txt').readAsLines();
   print("Part 1: ${await bestTravelDistance()}");
   print("Part 2: ${await bestTravelDistance(closest: false)}");
 }
@@ -13,10 +14,6 @@ main() async {
 readFile() async {
   cities = [];
   visited = [];
-  if (lines == null) {
-    lines = await new File('inputs/day9_input.txt').readAsLines();
-  }
-
   for (String line in lines) {
     List<String> tokens = line.split(' ');
     var place1 = City.getByName(tokens[0]);
