@@ -6,35 +6,52 @@ List<Place> visited = [];
 
 class Place {
   final String name;
-  Map<Place, int> routes;
+  Map<Place, int> distances;
 
-  static getPlaceByName(String name)
-    => places.where((place) => place.name == name);
+  static getPlaceByName(String name, {Map distances}) {
+    if (distances == null) distances = {};
 
-  Place getClosest() {
-    Place closest;
+    var lookup = places.where((place) => place.name == name);
+    if (lookup.isEmpty) {
+      Place place = new Place(name, distances);
+      places.add(place);
+      return place;
+    } else {
+      return lookup.single;
+    }
+  }
+
+  Place getNextCity({bool closest: true}) {
+    Place candidate;
     try {
-      closest = routes.keys.firstWhere((p) => !visited.contains(p));
+      candidate = distances.keys.firstWhere((p) => !visited.contains(p));
     } catch (_) {
       return null;
     }
 
-    int shortest = routes[closest];
+    int bestDistance = distances[candidate];
 
-    for (Place route in routes.keys) {
+    for (Place route in distances.keys) {
       if (visited.contains(route) || !places.contains(route)) continue;
 
-      if (routes[route] < shortest) {
-        shortest = routes[route];
-        closest = route;
+      bool isNextCandidate = closest ? (distances[route] < bestDistance) : (distances[route] > bestDistance);
+      if (isNextCandidate) {
+        bestDistance = distances[route];
+        candidate = route;
       }
     }
 
-    return closest;
+    return candidate;
   }
 
-  Place(this.name, this.routes);
-  toString() => '($name, ${routes.length})';
+  Place(this.name, this.distances);
+  toString() => '($name, ${distances.length})';
+}
+
+main() async {
+  await runAllRoutes(1);
+  print('------------------------------------');
+  await runAllRoutes(2, closest: false);
 }
 
 readFile() async {
@@ -53,57 +70,40 @@ readFile() async {
     int distance = int.parse(tokens[4]);
 
     // Lookup the place
-    Place place;
-    var lookup = Place.getPlaceByName(name);
-
-    if (lookup.isEmpty) {
-      // Encountered a new city
-      place = new Place(name, {});
-      places.add(place);
-    } else {
-      // Get a handle on the existing city
-      place = lookup.single;
-    }
+    var place = Place.getPlaceByName(name);
 
     // Lookup the route
-    Place routePlace;
-    var routeLookup = Place.getPlaceByName(route);
-
-    if (routeLookup.isEmpty) {
-      // Encountered a new city
-      routePlace = new Place(route, {place: distance});
-      places.add(routePlace);
-    } else {
-      // Get a handle on the existing city
-      routePlace = routeLookup.single;
-    }
+    var routePlace = Place.getPlaceByName(route, distances: {place: distance});
 
     // Make place route to routePlace and vice-versa
-    place.routes[routePlace] = distance;
-    routePlace.routes[place] = distance;
+    place.distances[routePlace] = distance;
+    routePlace.distances[place] = distance;
   }
 }
 
-main() async {
+runAllRoutes(int part, {bool closest: true}) async {
   await readFile();
   final n = places.length;
 
-  int shortest;
+  print("Part $part:\n");
+
+  int bestDistance;
   int index;
 
   for (int i = 0; i < n; i++) {
-    int distance = takeRoute(places[i]);
-    if (shortest == null || distance < shortest) {
-      shortest = distance;
+    int distance = takeRoute(places[i], closest: closest);
+    if (bestDistance == null ||
+        (closest ? (distance < bestDistance) : (distance > bestDistance))) {
+      bestDistance = distance;
       index = i;
     }
     await readFile();
   }
 
-  print("\nWinner: $shortest (${places[index].name})");
+  print("\nWinner: $bestDistance (${places[index].name})");
 }
 
-takeRoute(Place place) {
+takeRoute(Place place, {bool closest: true}) {
   var sb = new StringBuffer();
   sb.write(place.name);
 
@@ -112,20 +112,22 @@ takeRoute(Place place) {
 
 
   while (places.isNotEmpty) {
-    Place closest = current.getClosest();
-    if (closest == null) break;
-    visited.add(closest);
+    Place next = current.getNextCity(closest: closest);
 
-    sb.write(" ->  ${closest.name}");
-    distance += current.routes[closest];
+    if (next == null) break;
+    visited.add(next);
+
+    sb.write(" ->  ${next.name}");
+    distance += current.distances[next];
 
     places.remove(current);
-    closest.routes.remove(place);
-    current.routes.remove(place);
-    closest.routes.remove(current);
-    current.routes.remove(closest);
+    current.distances.remove(place);
+    next.distances.remove(place);
 
-    current = closest;
+    next.distances.remove(current);
+    current.distances.remove(next);
+
+    current = next;
   }
 
   print('$distance: $sb');
