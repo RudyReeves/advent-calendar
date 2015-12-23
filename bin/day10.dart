@@ -18,7 +18,7 @@ lookAndSay(n) {
   }
   result.write('$count$currentDigit');
 
-  return '$result'.length;
+  return result.toString();
 }
 
 main() {
@@ -26,5 +26,5 @@ main() {
   for (int i = 0; i < 40; i++) {
     result = lookAndSay(result);
   }
-  print(result);
+  print(result.length);
 }
