@@ -30,12 +30,12 @@ arrangeSeating(String startingPerson) {
   String next;
   int amount = 0;
   while ((next = getNext(current)) != null) {
-    print("  -> $next (${happiness[current][next]} for $current, ${happiness[next][current]} for $next)");
+    print("  -> $next (${happiness[current][next]} for $current, ${happiness[next][current]} for $next) => ${happiness[current][next] + happiness[next][current]}");
     amount += happiness[current][next] + happiness[next][current];
     visited.add(current);
     current = next;
   }
-  print("  -> (${happiness[current][startingPerson]} for $current, ${happiness[startingPerson][current]} for $startingPerson)");
+  print("  -> (${happiness[current][startingPerson]} for $current, ${happiness[startingPerson][current]} for $startingPerson) => ${happiness[current][startingPerson] + happiness[startingPerson][current]}");
   amount += happiness[current][startingPerson] + happiness[startingPerson][current];
   print("  = $amount");
   return amount;
@@ -48,13 +48,13 @@ getNext(String person) {
   return sorted.keys.firstWhere((p) => !visited.contains(p), orElse: () => null);
 }
 
-getBestArrangement() async{
+getBestArrangement() async {
   await parseFile();
   var amounts = [];
   for (int i = 0; i < happiness.keys.length; i++) {
     amounts.add(arrangeSeating(happiness.keys.elementAt(i)));
     await parseFile();
-  }
+  }2
   amounts.sort();
   return amounts.last;
 }
