@@ -1,6 +1,6 @@
 final input = 1113122113;
 
-lookAndSay(int n) {
+lookAndSay(n) {
   List<String> digits = n.toString().split('');
   var result = new StringBuffer();
 
@@ -18,11 +18,11 @@ lookAndSay(int n) {
   }
   result.write('$count$currentDigit');
 
-  return int.parse('$result');
+  return '$result';
 }
 
 main() {
-  int result = input;
+  var result = input;
   for (int i = 0; i < 40; i++) {
     result = lookAndSay(result);
   }
