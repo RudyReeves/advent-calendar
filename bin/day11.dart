@@ -1,4 +1,4 @@
-var input = 'hxbxwxba';
+var input = 'hxbxxyzz';
 
 main() {
   print(nextPassword(input));
