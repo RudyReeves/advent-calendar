@@ -30,7 +30,6 @@ class Place {
     }
 
     int bestDistance = distances[candidate];
-
     for (Place route in distances.keys) {
       if (visited.contains(route) || !places.contains(route)) continue;
 
@@ -40,7 +39,6 @@ class Place {
         candidate = route;
       }
     }
-
     return candidate;
   }
 
@@ -58,7 +56,7 @@ readFile() async {
   places = [];
   visited = [];
 
-  // Read in the file's if necessary
+  // Read in the file if necessary
   if (lines == null) {
     lines = await new File('inputs/day9_input.txt').readAsLines();
   }
