@@ -1,5 +1,5 @@
-import 'dart:io';
-import 'dart:convert';
+import 'dart:io' show File;
+import 'dart:convert' show JSON;
 
 main() async {
   String contents = await new File('inputs/day12_input.txt').readAsString();

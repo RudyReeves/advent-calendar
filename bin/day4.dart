@@ -1,4 +1,4 @@
-import 'package:crypto/crypto.dart';
+import 'package:crypto/crypto.dart' show CryptoUtils, MD5;
 
 md5(String key) {
   var md5 = new MD5()..add(key.codeUnits);

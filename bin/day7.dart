@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show File;
 
 List<Wire> wires = [];
 List<Gate> gates = [];

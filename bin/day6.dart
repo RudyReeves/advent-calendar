@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show File;
 
 const turnOn = 'turn on ';
 const turnOff = 'turn off ';

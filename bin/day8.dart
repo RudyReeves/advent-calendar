@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show File;
 
 main() async {
   List lines = await new File('inputs/day8_input.txt').readAsLines();
