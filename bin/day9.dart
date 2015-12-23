@@ -24,7 +24,6 @@ parseFile() async {
   }
 }
 
-
 getNext(String city, {bool closest: true}) {
   sorter(city1, city2) => (paths[city][city1] - paths[city][city2]) * (closest ? 1 : -1);
   var keys = paths[city].keys.toList()..sort(sorter);
