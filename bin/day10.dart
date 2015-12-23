@@ -18,7 +18,7 @@ lookAndSay(n) {
   }
   result.write('$count$currentDigit');
 
-  return '$result';
+  return '$result'.length;
 }
 
 main() {
