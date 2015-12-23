@@ -1,4 +1,5 @@
 import 'dart:io' show File;
+import 'dart:collection' show LinkedHashMap;
 
 List<String> lines;
 List<Place> places = [];
@@ -8,12 +9,10 @@ class Place {
   final String name;
   Map<Place, int> distances;
 
-  static getPlaceByName(String name, {Map distances}) {
-    if (distances == null) distances = {};
-
+  static getPlaceByName(String name) {
     var lookup = places.where((place) => place.name == name);
     if (lookup.isEmpty) {
-      Place place = new Place(name, distances);
+      Place place = new Place(name, {});
       places.add(place);
       return place;
     } else {
@@ -21,25 +20,14 @@ class Place {
     }
   }
 
-  Place getNextCity({bool closest: true}) {
-    Place candidate;
+  getNextCity({bool closest: true}) {
+    sorter(p1, p2) => (distances[p1] - distances[p2]) * (closest ? 1 : -1);
+    var sorted = new LinkedHashMap.fromIterable(distances.keys.toList()..sort(sorter), value: (v) => distances[v]);
     try {
-      candidate = distances.keys.firstWhere((p) => !visited.contains(p));
+      return sorted.keys.firstWhere((p) => !visited.contains(p));
     } catch (_) {
       return null;
     }
-
-    int bestDistance = distances[candidate];
-    for (Place route in distances.keys) {
-      if (visited.contains(route) || !places.contains(route)) continue;
-
-      bool isNextCandidate = closest ? (distances[route] < bestDistance) : (distances[route] > bestDistance);
-      if (isNextCandidate) {
-        bestDistance = distances[route];
-        candidate = route;
-      }
-    }
-    return candidate;
   }
 
   Place(this.name, this.distances);
@@ -47,87 +35,50 @@ class Place {
 }
 
 main() async {
-  await runAllRoutes(1);
-  print('------------------------------------');
-  await runAllRoutes(2, closest: false);
+  print("Part 1: ${await tryAllPaths(1)}");
+  print("Part 2: ${await tryAllPaths(2, closest: false)}");
 }
 
 readFile() async {
   places = [];
   visited = [];
-
-  // Read in the file if necessary
   if (lines == null) {
     lines = await new File('inputs/day9_input.txt').readAsLines();
   }
 
   for (String line in lines) {
     List<String> tokens = line.split(' ');
-    String name = tokens[0];
-    String route = tokens[2];
+    var place1 = Place.getPlaceByName(tokens[0]);
+    var place2 = Place.getPlaceByName(tokens[2]);
     int distance = int.parse(tokens[4]);
 
-    // Lookup the place
-    var place = Place.getPlaceByName(name);
-
-    // Lookup the route
-    var routePlace = Place.getPlaceByName(route, distances: {place: distance});
-
-    // Make place route to routePlace and vice-versa
-    place.distances[routePlace] = distance;
-    routePlace.distances[place] = distance;
+    place1.distances[place2] = distance;
+    place2.distances[place1] = distance;
   }
 }
 
-runAllRoutes(int part, {bool closest: true}) async {
+tryAllPaths(int part, {bool closest: true}) async {
   await readFile();
-  final n = places.length;
-
-  print("Part $part:\n");
-
-  int bestDistance;
-  int index;
-
-  for (int i = 0; i < n; i++) {
-    int distance = takeRoute(places[i], closest: closest);
-    if (bestDistance == null ||
-        (closest ? (distance < bestDistance) : (distance > bestDistance))) {
-      bestDistance = distance;
-      index = i;
-    }
+  List distances = [];
+  for (int i = 0; i < places.length; i++) {
+    distances.add(tryPath(places[i], closest: closest));
     await readFile();
   }
-
-  print("\nWinner: $bestDistance (${places[index].name})");
+  distances.sort((d1, d2) => (d1 - d2) * (closest ? 1 : -1));
+  return distances.first;
 }
 
-takeRoute(Place place, {bool closest: true}) {
-  var sb = new StringBuffer();
-  sb.write(place.name);
-
+tryPath(Place place, {bool closest: true}) {
   int distance = 0;
-  Place current = place;
-
-
+  var current = place;
   while (places.isNotEmpty) {
     Place next = current.getNextCity(closest: closest);
-
     if (next == null) break;
-    visited.add(next);
 
-    sb.write(" ->  ${next.name}");
     distance += current.distances[next];
-
     places.remove(current);
-    current.distances.remove(place);
-    next.distances.remove(place);
-
-    next.distances.remove(current);
-    current.distances.remove(next);
-
+    visited.add(current);
     current = next;
   }
-
-  print('$distance: $sb');
   return distance;
 }
