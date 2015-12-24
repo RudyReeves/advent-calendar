@@ -54,7 +54,7 @@ getBestArrangement() async {
   for (int i = 0; i < happiness.keys.length; i++) {
     amounts.add(arrangeSeating(happiness.keys.elementAt(i)));
     await parseFile();
-  }2
+  }
   amounts.sort();
   return amounts.last;
 }
